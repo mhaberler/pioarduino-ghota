@@ -1,0 +1,255 @@
+#pragma once
+
+#if defined(USE_M5STACK_OFFICIAL) || defined(USE_M5UNIFIED)
+#define M5DEV M5
+#endif
+
+#if defined(USE_M5STACK_OFFICIAL) || !defined(USE_M5UNIFIED)
+
+#if (defined(ARDUINO_M5STACK_BASIC) || defined(ARDUINO_M5STACK_FIRE) || \
+     defined(ARDUINO_M5STACK_M5GO))
+#include <M5Stack.h>
+inline void M5_BEGIN(bool LCDEnable = true, bool SDEnable = true,
+                     bool SerialEnable = true, bool I2CEnable = false) {
+    M5DEV.begin(LCDEnable, SDEnable, SerialEnable, I2CEnable);
+}
+#elif defined(ARDUINO_M5STACK_PAPER)
+#include <M5EPD.h>
+inline void M5_BEGIN(bool TouchEnable = true, bool SDEnable = true,
+                     bool SerialEnable = true, bool BatteryADCEnable = true,
+                     bool I2CEnable = false) {
+    M5DEV.begin(TouchEnable, SDEnable, SerialEnable, BatteryADCEnable,
+                I2CEnable);
+}
+#elif defined(ARDUINO_M5STACK_CORE2)
+#include <M5Core2.h>
+inline void M5_BEGIN(bool LCDEnable = true, bool SDEnable = true,
+                     bool SerialEnable = true, bool I2CEnable = false,
+                     mbus_mode_t mode = kMBusModeOutput,
+                     bool SpeakerEnable = true) {
+    M5DEV.begin(LCDEnable, SDEnable, SerialEnable, I2CEnable, mode,
+                SpeakerEnable);
+}
+#elif defined(ARDUINO_M5STACK_CORES3)
+#undef M5DEV
+#define M5DEV CoreS3
+#include <M5CoreS3.h>
+inline void M5_BEGIN(void) {
+    M5DEV.begin();
+}
+inline void M5_BEGIN(m5::M5Unified::config_t& cfg) {
+    M5DEV.begin(cfg);
+}
+#elif defined(ARDUINO_M5STICK_C)
+#if defined(ARDUINO_M5STICK_C_PLUS)
+#include <M5StickCPlus.h>
+inline void M5_BEGIN(bool LCDEnable = true, bool PowerEnable = true,
+                     bool SerialEnable = true) {
+    M5DEV.begin(LCDEnable, PowerEnable, SerialEnable);
+}
+#elif defined(ARDUINO_M5STICK_C_PLUS2)
+#include <M5StickCPlus2.h>
+#undef M5DEV
+#define M5DEV StickCP2
+inline void M5_BEGIN(void) {
+    M5DEV.begin();
+}
+inline void M5_BEGIN(m5::M5Unified::config_t cfg) {
+    M5DEV.begin(cfg);
+}
+#else
+#include <M5StickC.h>
+inline void M5_BEGIN(bool LCDEnable = true, bool PowerEnable = true,
+                     bool SerialEnable = true) {
+    M5DEV.begin(LCDEnable, PowerEnable, SerialEnable);
+}
+#endif
+#elif defined(ARDUINO_M5STACK_ATOM)
+#include <M5Atom.h>
+inline void M5_BEGIN(bool SerialEnable = true, bool I2CEnable = true,
+                     bool DisplayEnable = false) {
+    M5DEV.begin(SerialEnable, I2CEnable, DisplayEnable);
+    // https://twitter.com/wakwak_koba/status/1553162622479974400
+    pinMode(0, OUTPUT);
+    digitalWrite(0, LOW);
+}
+#elif defined(ARDUINO_M5STACK_ATOMS3)
+#include <M5AtomS3.h>
+#undef M5DEV
+#define M5DEV AtomS3
+inline void M5_BEGIN(bool LEDEnable = false) {
+    AtomS3.begin(LEDEnable);
+}
+inline void M5_BEGIN(m5::M5Unified::config_t cfg, bool LEDEnable = false) {
+    AtomS3.begin(cfg, LEDEnable);
+}
+#elif defined(ARDUINO_M5STACK_COREINK)
+#include <M5CoreInk.h>
+inline int M5_BEGIN(bool InkEnable = true, bool WireEnable = false,
+                    bool SpeakerEnable = false) {
+    return M5DEV.begin(InkEnable, WireEnable, SpeakerEnable);
+}
+#elif defined(ARDUINO_M5STACK_STAMPS3)
+#define FASTLED_INTERNAL
+#include <FastLED.h>
+#if defined(ARDUINO_M5STACK_DIAL)
+#include <M5Dial.h>
+#undef M5DEV
+#define M5DEV M5Dial
+inline void M5_BEGIN(bool enableEncoder = false, bool enableRFID = false) {
+    M5DEV.begin(enableEncoder, enableRFID);
+}
+inline void M5_BEGIN(m5::M5Unified::config_t cfg, bool enableEncoder = false,
+                     bool enableRFID = false) {
+    M5DEV.begin(cfg, enableEncoder, enableRFID);
+}
+#elif defined(ARDUINO_M5STACK_CARDPUTER)
+#include <M5Cardputer.h>
+#undef M5DEV
+#define M5DEV M5Cardputer
+inline void M5_BEGIN(void) {
+    M5DEV.begin();
+}
+inline void M5_BEGIN(m5::M5Unified::config_t& cfg) {
+    M5DEV.begin(cfg);
+}
+#elif defined(ARDUINO_M5STACK_DIN_METER)
+#include <M5DinMeter.h>
+#undef M5DEV
+#define M5DEV DinMeter
+inline void M5_BEGIN(void) {
+    M5DEV.begin();
+    M5DEV.Lcd.setRotation(1);
+}
+inline void M5_BEGIN(m5::M5Unified::config_t& cfg) {
+    M5DEV.begin(cfg);
+}
+#else
+#include <Arduino.h>
+#undef M5DEV
+inline void M5_BEGIN(void) {
+}
+#endif
+#elif defined(ARDUINO_M5STACK_NANOC6) || defined(ARDUINO_M5STACK_NANOH2)
+#if defined(ARDUINO_M5STACK_NANOC6)
+#include <M5NanoC6.h>
+#undef M5DEV
+#define M5DEV                   NanoC6
+#define M5NANO_BLUE_LED_PIN     M5NANO_C6_BLUE_LED_PIN
+#define M5NANO_RGB_LED_DATA_PIN M5NANO_C6_RGB_LED_DATA_PIN
+#define M5NANO_RGB_LED_PWR_PIN  M5NANO_C6_RGB_LED_PWR_PIN
+#elif defined(ARDUINO_M5STACK_NANOH2)
+#include <Arduino.h>
+#define M5NANO_H2_BLUE_LED_PIN     4
+#define M5NANO_H2_RGB_LED_DATA_PIN 11
+#define M5NANO_H2_RGB_LED_PWR_PIN  10
+#define M5NANO_H2_BTN_A_PIN        9
+#define M5NANO_BLUE_LED_PIN        M5NANO_H2_BLUE_LED_PIN
+#define M5NANO_RGB_LED_DATA_PIN    M5NANO_H2_RGB_LED_DATA_PIN
+#define M5NANO_RGB_LED_PWR_PIN     M5NANO_H2_RGB_LED_PWR_PIN
+#endif
+
+#if defined(USE_BLUE_LED)
+inline void setLED(bool on) {
+    digitalWrite(M5NANO_BLUE_LED_PIN, on ? HIGH : LOW);
+}
+#endif
+#if defined(USE_RGB_LED)
+#include <Adafruit_NeoPixel.h>
+#define NUM_LEDS 1
+Adafruit_NeoPixel RGB_LED(NUM_LEDS, M5NANO_RGB_LED_DATA_PIN,
+                          NEO_GRB + NEO_KHZ800);
+inline void setRGB(uint8_t r, uint8_t g, uint8_t b, bool show = true) {
+    RGB_LED.setPixelColor(0, RGB_LED.Color(r, g, b));
+    if (show) {
+        RGB_LED.show();
+    }
+}
+#endif
+inline void M5_BEGIN(void) {
+#if defined(ARDUINO_M5STACK_NANOC6)
+    M5DEV.begin();
+#elif defined(ARDUINO_M5STACK_NANOH2)
+    pinMode(M5NANO_H2_BTN_A_PIN, INPUT_PULLUP);
+#endif
+#if defined(USE_RGB_LED)
+    pinMode(M5NANO_RGB_LED_PWR_PIN, OUTPUT);
+    digitalWrite(M5NANO_RGB_LED_PWR_PIN, HIGH);
+    RGB_LED.begin();
+#endif
+#if defined(USE_BLUE_LED)
+    pinMode(M5NANO_BLUE_LED_PIN, OUTPUT);
+#endif
+}
+#endif
+
+#elif defined(USE_M5UNIFIED)
+// clang-format off
+#include <M5Unified.h>
+#if defined(USE_FASTLED)
+#define FASTLED_INTERNAL
+#include <FastLED.h>
+#endif
+#if defined(USE_MODULE_LLM)
+#include <M5ModuleLLM.h>
+#endif
+#if defined(ARDUINO_M5STACK_TAB5) || \
+    (defined(USE_WIFI) && defined(ARDUINO_M5STACK_STAMPP4))
+#include <WiFi.h>
+#if defined(ARDUINO_M5STACK_TAB5)
+#define SDIO_CLK GPIO_NUM_12
+#define SDIO_CMD GPIO_NUM_13
+#define SDIO_D0  GPIO_NUM_11
+#define SDIO_D1  GPIO_NUM_10
+#define SDIO_D2  GPIO_NUM_9
+#define SDIO_D3  GPIO_NUM_8
+#define SDIO_RST GPIO_NUM_15
+#endif
+#if defined(ARDUINO_M5STACK_STAMPP4)
+#define SDIO_CLK GPIO_NUM_43
+#define SDIO_CMD GPIO_NUM_44
+#define SDIO_D0  GPIO_NUM_45
+#define SDIO_D1  GPIO_NUM_46
+#define SDIO_D2  GPIO_NUM_47
+#define SDIO_D3  GPIO_NUM_48
+#define SDIO_RST GPIO_NUM_42
+#endif
+#endif
+
+// clang-format on
+inline void M5_BEGIN(m5::M5Unified::config_t& cfg) {
+    M5DEV.begin(cfg);
+#if defined(ARDUINO_M5STACK_TAB5) || \
+    (defined(USE_WIFI) && defined(ARDUINO_M5STACK_STAMPP4))
+    WiFi.setPins(SDIO_CLK, SDIO_CMD, SDIO_D0, SDIO_D1, SDIO_D2, SDIO_D3,
+                 SDIO_RST);
+#endif
+}
+
+inline void M5_BEGIN(void) {
+    auto cfg = M5.config();
+    M5_BEGIN(cfg);
+}
+#endif
+
+inline void M5_UPDATE(void) {
+#if defined(USE_M5STACK_OFFICIAL) || defined(USE_M5UNIFIED)
+#if !defined(ARDUINO_M5STACK_STAMPS3)
+    M5DEV.update();
+#endif
+#endif
+}
+
+#if defined(USE_M5UNIFIED)
+#define M5DEV_LOGE M5_LOGE
+#define M5DEV_LOGW M5_LOGW
+#define M5DEV_LOGI M5_LOGI
+#define M5DEV_LOGD M5_LOGD
+#define M5DEV_LOGV M5_LOGV
+#else
+#define M5DEV_LOGE(format, ...) log_e("[%s] " format, "M5BP", ##__VA_ARGS__)
+#define M5DEV_LOGW(format, ...) log_w("[%s] " format, "M5BP", ##__VA_ARGS__)
+#define M5DEV_LOGI(format, ...) log_i("[%s] " format, "M5BP", ##__VA_ARGS__)
+#define M5DEV_LOGD(format, ...) log_d("[%s] " format, "M5BP", ##__VA_ARGS__)
+#define M5DEV_LOGV(format, ...) log_v("[%s] " format, "M5BP", ##__VA_ARGS__)
+#endif
