@@ -6,7 +6,7 @@ on:
       platformio_envs:
         description: "PlatformIO environments to build as a JSON array"
         required: true
-        default: '["m5stack-basic"]'
+        default: '["m5stack-nanoc6"]'
 
 jobs:
   build:

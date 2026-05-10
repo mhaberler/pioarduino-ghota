@@ -4,3 +4,4 @@
 .vscode/launch.json
 .vscode/ipch
 src/idf_component.yml*
+.vscode/extensions.json
