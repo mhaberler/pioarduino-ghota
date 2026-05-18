@@ -1,266 +1,206 @@
-[In English](README_en_US.md)
+# pioarduino-ghota
 
-# PlatformIO IDE 向け M5Stack 定型コード環境
+ESP32 / M5Stack PlatformIO firmware demonstrating [SafeGithubOTA] with
+BLE WiFi provisioning and automated GitHub-release-driven OTA updates.
 
-[Arduino IDE](https://www.arduino.cc/en/software) 環境と同じように [PlatformIO IDE](https://platformio.org/platformio-ide) 環境でも `setup()`と`loop()`の中身を書いてすぐにコンパイルして実行できます。
-## 対応機種
+[SafeGithubOTA]: https://github.com/gibz104/SafeGithubOTA
 
-| 機種名               | 環境名                                                        | 備考                                                                                                                                                                                                                                 |
-| :------------------- | :------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| M5Stack BASIC        | env:m5stack-basic                                              | [公式ライブラリ](https://github.com/m5stack/M5Stack)を使用。                                                                                                                                                                           |
-| M5Stack Fire         | env:m5stack-fire                                               | [公式ライブラリ](https://github.com/m5stack/M5Stack)を使用。                                                                                                                                                                           |
-| M5Stack M5GO         | env:m5stack-m5go                                               | [公式ライブラリ](https://github.com/m5stack/M5Stack)を使用。                                                                                                                                                                           |
-| M5Stack CORE2        | env:m5stack-core2 <br> env:m5stack-core2-m5unified             | [公式ライブラリ](https://github.com/m5stack/M5Core2)を使用（ライブラリ廃止予定）。<br>[M5Unified](https://github.com/m5stack/M5Unified)を使用。                                                                                        |
-| M5Stack CORES3       | env:m5stack-cores3 <br> env:m5stack-cores3-m5unified           | [公式ライブラリ](https://github.com/m5stack/M5CoreS3)を使用。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。USB CDC On Boot が有効。                                                                                    |
-| M5StickC             | env:m5stick-c                                                  | [公式ライブラリ](https://github.com/m5stack/M5StickC)を使用。                                                                                                                                                                          |
-| M5StickC Plus        | env:m5stick-c-plus                                             | [公式ライブラリ](https://github.com/m5stack/M5StickC-Plus)を使用。                                                                                                                                                                     |
-| M5StickC Plus2       | env:m5stick-c-plus2-m5unified                                  | [M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                                                                                             |
-| M5StickS3            | env:m5stick-s3                                                 | 公式ライブラリはなし。<br> [M5Unified](https://github.com/m5stack/M5Unified)，[M5PM1](https://github.com/m5stack/M5PM1) を使用。USB CDC On Boot が有効。                                                                               |
-| M5ATOM Matrix        | env:m5stack-atom-matrix <br> env:m5stack-atom-matrix-m5unified | [公式ライブラリ](https://github.com/m5stack/M5Atom)を使用。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                              |
-| M5ATOM Lite          | env:m5stack-atom-lite <br> env:m5stack-atom-lite-m5unified     | [公式ライブラリ](https://github.com/m5stack/M5Atom)を使用。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                              |
-| M5ATOM Echo          | env:m5stack-atom-echo <br> env:m5stack-atom-echo-m5unified     | [公式ライブラリ](https://github.com/m5stack/M5Atom)を使用。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                              |
-| M5ATOM U             | env:m5stack-atom-u <br> env:m5stack-atom-u-m5unified           | [公式ライブラリ](https://github.com/m5stack/M5Atom)を使用。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                              |
-| M5ATOMS3             | env:m5stack-atoms3 <br> env:m5stack-atoms3-m5unified           | [公式ライブラリ](https://github.com/m5stack/M5AtomS3)を使用（[M5Unified](https://github.com/m5stack/M5Unified)ベース）。USB CDC On Boot が有効。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。USB CDC On Boot が有効。 |
-| M5ATOMS3R            | env:m5stack-atoms3r-m5unified                                  | [M5Unified](https://github.com/m5stack/M5Unified) を使用。USB CDC On Boot が有効。                                                                                                                                                     |
-| M5ATOM EchoS3R       | env:m5stack-atom-echos3r-m5unified                             | [M5Unified](https://github.com/m5stack/M5Unified) を使用。USB CDC On Boot が有効。                                                                                                                                                     |
-| M5ATOMS3 Lite        | env:m5stack-atoms3-lite <br> env:m5stack-atoms3-lite-m5unified | [公式ライブラリ](https://github.com/m5stack/M5AtomS3)を使用（[M5Unified](https://github.com/m5stack/M5Unified)ベース）。USB CDC On Boot が有効。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。USB CDC On Boot が有効。 |
-| M5ATOMS3 U           | env:m5stack-atoms3-u <br> env:m5stack-atoms3-u-m5unified       | [公式ライブラリ](https://github.com/m5stack/M5AtomS3)を使用（[M5Unified](https://github.com/m5stack/M5Unified)ベース）。USB CDC On Boot が有効。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。USB CDC On Boot が有効。 |
-| M5Stack CoreInk      | env:m5stack-coreink                                            | [公式ライブラリ](https://github.com/m5stack/M5Core-Ink)を使用。                                                                                                                                                                        |
-| M5Stack Paper        | env:m5stack-paper                                              | [公式ライブラリ](https://github.com/m5stack/M5EPD)を使用。                                                                                                                                                                             |
-| M5Stack PaperS3      | env:m5stack-papers3                                            | 公式ライブラリはなし。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                                                                   |
-| M5StampS3            | env:m5stack-stamps3 <br> env:m5stack-stamps3-m5unified         | 公式ライブラリはなし。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。USB CDC On Boot が有効。                                                                                                                           |
-| M5Capsule            | env:m5stack-capsule-m5unified                                  | [M5Unified](https://github.com/m5stack/M5Unified) を使用。USB CDC On Boot が有効。                                                                                                                                                     |
-| M5Dial               | env:m5stack-dial <br> env:m5stack-dial-m5unified               | [公式ライブラリ](https://github.com/m5stack/M5Dial)を使用（[M5Unified](https://github.com/m5stack/M5Unified)ベース）。<br>[M5Unified](https://github.com/m5stack/M5Unified)を使用。USB CDC On Boot が有効。                            |
-| M5Cardputer          | env:m5stack-cardputer                                          | [公式ライブラリ](https://github.com/m5stack/M5Cardputer)を使用（[M5Unified](https://github.com/m5stack/M5Unified)ベース）。USB CDC On Boot が有効。                                                                                    |
-| M5DinMeter           | env:m5stack-din-meter                                          | [公式ライブラリ](https://github.com/m5stack/M5DinMeter)を使用（[M5Unified](https://github.com/m5stack/M5Unified)ベース）。USB CDC On Boot が有効。                                                                                     |
-| M5StampP4            | env:m5stack-stampp4                                            | 公式ライブラリはなし。<br>[M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                                                                   |
-| M5NanoC6             | env:m5stack-nanoc6                                             | [公式ライブラリ](https://github.com/m5stack/M5NanoC6)を使用。プラットフォームは[pioarduino](https://github.com/pioarduino/platform-espressif32)を使用。                                                                                |
-| M5NanoH2             | env:m5stack-nanoh2                                             | プラットフォームは[pioarduino](https://github.com/pioarduino/platform-espressif32)を使用。                                                                                                                                             |
-| M5Stack Tab5         | env:m5stack-tab5                                               | [M5Unified](https://github.com/m5stack/M5Unified) を使用。プラットフォームは[pioarduino](https://github.com/pioarduino/platform-espressif32)を使用。                                                                                   |
-| M5Stack Chain DualKey| env:m5stack-chain-dualkey                                      | [M5Unified](https://github.com/m5stack/M5Unified) を使用。USB CDC On Boot が有効。                                                                                                                                                     |
-| M5Stack BASIC w/LLM  | env:m5stack-basic-m5unified-llm                                | [M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                                                                                             |
-| M5Stack Core2 w/LLM  | env:m5stack-core2-m5unified-llm                                | [M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                                                                                             |
-| M5Stack CoreS3 w/LLM | env:m5stack-cores3-m5unified-llm                               | [M5Unified](https://github.com/m5stack/M5Unified) を使用。                                                                                                                                                                             |
+## What it does
 
-## 事前準備
+- BLE WiFi provisioning via `WiFiProv` (`NETWORK_PROV_SCHEME_BLE`) —
+  the device advertises a setup SSID; use the Espressif
+  "ESP BLE Provisioning" app to hand over credentials, which are
+  persisted to NVS for subsequent boots.
+- Automatic OTA from GitHub releases: one-shot post-boot check
+  (`AUTOCHECK_POST_BOOT`) and/or periodic poll (`AUTOCHECK_INTERVAL`).
+- Validation callback on first boot after an OTA; if it returns
+  `false`, the ESP32 bootloader rolls back to the previous firmware.
+- Reproducible CI builds and tagged releases via GitHub Actions.
 
-### コード整形の設定
+## ESP BLE Prov mobile app
 
-コードの整形は`.vscode/settings.json`で`"C_Cpp.clang_format_style": "file"`にしているため，`.clang-format`で設定できます。ご自身の好きな設定に変更してください。
+You will need the `ESP BLE Prov` provisioning app to set the WiFi credentials.
 
-### 環境設定
+- [ESP BLE Prov for Android](https://play.google.com/store/apps/details?id=com.espressif.provble&hl=en)
+- [ESP BLE Prov for iOS](https://apps.apple.com/us/app/esp-ble-provisioning/id1473590141)
 
-#### 接続ポートの設定
+Alternatively you can use WiFi to configure WiFi credentials - see the [SafeGithubOTA examples](https://github.com/gibz104/SafeGithubOTA/tree/main/examples) if your want to go that route.
 
-`platformio.ini`の`[platformio]`セクションにある`upload_port`と`monitor_port`のコメントを外し，`upload_port`に設定するポートを実機が接続しているポートに変更します。
+## How to use this repo without building firmware yourself
 
-```platformio.ini
-upload_port = COM16
-monitor_port = ${env.upload_port}
-```
+1. go to [https://github.com/mhaberler/pioarduino-ghota](https://github.com/mhaberler/pioarduino-ghota/releases/)
+2. select the latest release at the top
+3. find a `_firmware_<version>.bin` file matching your hardware - this is the factory version to flash pristine hardware - the `_ota.bin` file is just for Over-the-Air updates.
+4. and download it
+5. run the [WebSerial ESPTool](https://jason2866.github.io/WebSerial_ESPTool/)
+   1. select the erial port
+   2. in `Choose a file ...` select the firmware\_<version>.bin` file just dowloaded
+   3. Click `Program`
+   4. Connect a terminal window - you should see some logs during startup
+6. At this stage the firmware lacks WiFi credentials - they can be set with the `ESP BLE Prov` app (available for iOS and Android)
+7. Once the credentials are set, firmware will reboot, connect to WiFi and check for new OTA releases as configure in the platformio.ini and src/main.cpp files.
 
-※PlatformIO IDE [v3.0.0](https://github.com/platformio/platformio-vscode-ide/releases/tag/v3.0.0)より，ステータスバーからポートの切り替えができるようになりました。
+## My hardware is not listed / I want to use this for my project
 
-#### 環境の設定
+1. fork this repo
+2. find a matching hardware configuration in [platformio.ini](platformio.ini) or create a new one.
+3. Add your code.
+4. Build and flash the firmware locally until confident. If WiFi credentials are set the firmware should check for OTA updateds but fail as the automatic build is not yet set up - that is the next steps:
+5. Edit the `[ci]` section and replace with your target configuration.
+6. commit and push
+7. push a tag higher than the current version - use the Pioarduino Custom `Bump semver git tag` action.
+8. The firmware for the new target should build on github and show up under releases
+9. restart the hardware. An OTA update should happen and the new release come up.
 
-「Switch PlatformIO Project Environment」（VSCode のステータスバーにある）で機種に合った環境名を設定します。
+## Supported boards
 
-`platformio.ini`の`[platformio]`セクションで`default_envs`を明示的に指定することでも環境を設定できます（既に書いてあるので，いずれかのコメントを外す）。以下の例では`m5stack-basic`を指定しています。
+[platformio.ini](platformio.ini) declares envs for the full M5Stack
+family — Basic, Fire, M5Go, Core2, CoreS3, StickC family, Atom and
+AtomS3 family, CoreInk, Paper, PaperS3, StampS3, StampP4, Capsule,
+Dial, Cardputer, DIN Meter, NanoC6, NanoH2, Tab5, and several
+`m5unified` / LLM variants.
 
-```platformio.ini
-[platformio]
-default_envs = m5stack-basic
-; default_envs = m5stack-fire
-; default_envs = m5stack-m5go
-; default_envs = m5stack-core2
-; default_envs = m5stack-cores3
-; default_envs = m5stack-cores3-m5unified
-; default_envs = m5stick-c
-; default_envs = m5stick-c-plus
-; default_envs = m5stick-c-plus2-m5unified
-; default_envs = m5stick-s3
-; default_envs = m5stack-atom-matrix
-; default_envs = m5stack-atom-lite
-; default_envs = m5stack-atom-echo
-; default_envs = m5stack-atom-u
-; default_envs = m5stack-atom-matrix-m5unified
-; default_envs = m5stack-atom-lite-m5unified
-; default_envs = m5stack-atom-echo-m5unified
-; default_envs = m5stack-atom-u-m5unified
-; default_envs = m5stack-atoms3
-; default_envs = m5stack-atoms3r-m5unified
-; default_envs = m5stack-atom-echos3r-m5unified
-; default_envs = m5stack-atoms3-lite
-; default_envs = m5stack-atoms3-u
-; default_envs = m5stack-atoms3-m5unified
-; default_envs = m5stack-atoms3-lite-m5unified
-; default_envs = m5stack-atoms3-u-m5unified
-; default_envs = m5stack-coreink
-; default_envs = m5stack-paper
-; default_envs = m5stack-papers3
-; default_envs = m5stack-stamps3
-; default_envs = m5stack-stamps3-m5unified
-; default_envs = m5stack-capsule-m5unified
-; default_envs = m5stack-dial
-; default_envs = m5stack-dial-m5unified
-; default_envs = m5stack-cardputer
-; default_envs = m5stack-din-meter
-; default_envs = m5stack-stampp4
-; default_envs = m5stack-nanoc6
-; default_envs = m5stack-nanoh2
-; default_envs = m5stack-tab5
-; default_envs = m5stack-chain-dualkey
+Only the envs listed in the `[ci]` section are built by CI, currently:
 
-; default_envs = m5stack-basic-m5unified-llm
-; default_envs = m5stack-core2-m5unified-llm
-; default_envs = m5stack-cores3-m5unified-llm
-```
+- `m5stack-nanoc6`
+- `m5stack-cores3-m5unified`
 
-### 外部ライブラリの追加
+Edit as required in [platformio.ini](platformio.ini).
 
-外部ライブラリを使用する場合は，`[env]`セクションにある`lib_deps`に追加します。
+Other envs build locally but are not gated by CI. See [build-firmware.yml](.github/workflows/build-firmware.yml) and [release.yml](.github/workflows/release.yml).
 
-```ini
-lib_deps =
-    fastled/FastLED
-```
+### Non-M5Stack Espressif targets
 
-### コードの記述
+Any ESP32 / S2 / S3 / C3 / C6 / H2 board supported by the ESP32
+Arduino core works. Add an `[env:my-board]` section to
+[platformio.ini](platformio.ini) with the right `board =`, extend
+`build-target`, and inherit the appropriate `lib_deps`. The M5Stack
+envs are preconfigured only because the upstream boilerplate
+(see Credits) ships them.
 
-`main.cpp`の`setup()`，`loop()`にコードを書きます。必要なヘッダファイルは`main.hpp`で環境名に合わせて実機に合ったヘッダファイルをインクルードするようにしています。
+## Quick start
 
-各機種で`M5.begin()`の引数がまちまちでわかりにくく，`CoreS3.begin()`のように機種固有の名前が付いている場合もあるので，`M5_BEGIN`と`M5_UPDATE`というマクロで差異を吸収しています。
-また，機種によっては`M5`のインスタンスに機種固有の名前（M5Stack CoreS3 の公式ライブラリの場合は`M5`ではなく`CoreS3`）がついている場合があるので，どの場合でも同じ`M5DEV`でアクセスできるように設定しています。
-
-共通の書き方でログの出力をするために，`M5DEV_LOGE()`，`M5DEV_LOGW()`，`M5DEV_LOGI()`，`M5DEV_LOGD()`，`M5DEV_LOGV()`を定義しました。
-
-それぞれの定義内容に関しては`main.hpp`を参照してください。
-
-注意：M5Unified で`SD.h`や`SPIFFS.h`を使用する場合は，`#include "main.hpp"`より前に入れてください。
-
-```c++
-// clang-format off
-#include <SPIFFS.h>
-#include "main.hpp"
-// clang-format on
-```
-
-### 実機へのアップロード
-
-PlatformIO: Upload（VSCode のステータスバーにある → ボタン）を実行します。
-
-### ファームウェアファイルの生成
-
-この boilerplate には，配布用の merged firmware を生成するための PlatformIO custom target が含まれています。
-
-次のコマンドを実行すると，指定した PlatformIO environment 用のファームウェアファイルを生成できます。
+Prereqs: [PlatformIO Core](https://docs.platformio.org/en/latest/core/)
+(this repo targets the `pioarduino` fork; standard PlatformIO works
+for most envs too) with `pio` on PATH.
 
 ```sh
-pio run -e m5stack-basic -t firmware
+pio run -e m5stack-cores3-m5unified -t upload
+pio device monitor
 ```
 
-VSCode の PlatformIO 拡張機能を使っている場合は、PlatformIO の Project Tasks から対象の environment を選び、**Custom** にある **Generate merged firmware** を実行しても同じファームウェアファイルを生成できます。
+On first boot, BLE provisioning starts under the SSID `MyDevice-Setup`.
+Use the Espressif "ESP BLE Provisioning" app to deliver WiFi
+credentials; they persist in NVS for subsequent boots.
 
-これは、次のコマンドを実行するのと同じです。
+## Configuration
+
+Build-time macros (injected by
+[scripts/inject_build_info.py](scripts/inject_build_info.py) or set in
+[platformio.ini](platformio.ini)):
+
+| Macro                                                                          | Purpose                                     | Source                                                       |
+| ------------------------------------------------------------------------------ | ------------------------------------------- | ------------------------------------------------------------ |
+| `SGO_DEFAULT_OWNER` / `SGO_DEFAULT_REPO` / `SGO_DEFAULT_BIN`                   | OTA target repo + asset name                | [scripts/inject_build_info.py](scripts/inject_build_info.py) |
+| `SGO_DEFAULT_PAT`                                                              | optional private-repo personal access token | env override                                                 |
+| `AUTOCHECK_INTERVAL`                                                           | periodic OTA poll interval (seconds)        | `[ota-checking]` in [platformio.ini](platformio.ini)         |
+| `AUTOCHECK_POST_BOOT`                                                          | one-shot OTA check after first `STA_GOT_IP` | `[ota-checking]`                                             |
+| `BUILD_TAG` / `BUILD_SHA` / `BUILD_DATE` / `BUILD_REPO` / `BUILD_FIRMWARE_URI` | identity strings printed at boot            | [scripts/inject_build_info.py](scripts/inject_build_info.py) |
+
+OTA defaults are seeded into the `sgo_creds` NVS namespace on every
+boot; existing keys are preserved (see `seedSgoDefaults()` in
+[src/main.cpp](src/main.cpp)).
+
+## Repository layout
+
+- [src/main.cpp](src/main.cpp) — firmware entry point
+- [include/](include/) — public headers
+- [scripts/](scripts/) — PlatformIO pre/post scripts (build-info
+  injection, merged-firmware generation, version bump)
+- [firmware/](firmware/) — built artifacts (`custom_firmware_dir`)
+- [platformio.ini](platformio.ini) + [platformio-m5stack.ini](platformio-m5stack.ini) — environments
+- [.github/workflows/](.github/workflows/) — CI builds + tagged releases
+- [OTA.md](OTA.md) — full OTA flow and asset naming
+- [VERSIONBUMP.md](VERSIONBUMP.md) — release tagging workflow
+- [LICENCE.md](LICENCE.md) — license
+
+## Building the firmware
+
+### a) Locally with pioarduino
 
 ```sh
-pio run -e <environment> -t firmware
+pio run -e <env>                 # build
+pio run -e <env> -t upload       # build + flash
+pio device monitor               # serial console
 ```
 
-生成されるファームウェアファイルは，デフォルトでは `firmware/` ディレクトリに出力されます。
+### b) GitHub Actions: "Build merged firmware"
 
-ファイル名は次の形式になります。
+Manual trigger from the repo's **Actions** tab → **Build merged
+firmware** workflow → pick the branch → **Run workflow**. The matrix
+builds each env listed under `[ci] envs` in
+[platformio.ini](platformio.ini); merged firmware binaries are
+attached to the workflow run as artifacts. See
+[build-firmware.yml](.github/workflows/build-firmware.yml).
 
-```text
-プロジェクト名_env名_firmware_バージョン.bin
-```
+### c) Tagged release
 
-例：
+Push a higher semver `v*` tag to fire
+[release.yml](.github/workflows/release.yml), which builds the `[ci]`
+matrix and uploads OTA assets that deployed firmware then discovers
+via `api.github.com/.../releases/latest`.
 
-```text
-my_project_m5stack-basic_firmware_0.1.0.bin
-```
-
-プロジェクト名を明示したい場合は，`platformio.ini` の `[env]` セクションで `custom_firmware_name` を指定します。指定しない場合は，プロジェクトディレクトリ名が使用されます。
-
-```ini
-[env]
-custom_firmware_name = my_project
-```
-
-ファームウェアのバージョンは，次の優先順位で決まります。
-
-1. `custom_firmware_version`
-2. `custom_firmware_version_file` と `custom_firmware_version_regex` によるファイルからの抽出
-3. GitHub Actions 実行時の Git tag 名
-4. `dev`
-
-バージョンを直接指定する場合は，次のように設定します。
-
-```ini
-[env]
-custom_firmware_version = 0.1.0
-```
-
-ファイルから正規表現でバージョンを抽出する場合は，次のように設定します。
-
-```ini
-[env]
-custom_firmware_version_file = main.cpp
-custom_firmware_version_regex = "v(\d+\.\d+\.\d+)"
-```
-
-`custom_firmware_version` を指定した場合は，ファイルから抽出する設定よりも優先されます。
-
-### GitHub Actions でファームウェアを生成する
-
-この boilerplate には，GitHub 上でファームウェアをビルドするための GitHub Actions workflow も含まれています。
-
-この workflow は，boilerplate 本体のファームウェアを配布するためというより，この boilerplate から作成された派生プロジェクトが，自分のプロジェクト用ファームウェアを GitHub 上で生成・配布しやすくするためのものです。
-
-使い方は次のとおりです。
-
-1. GitHub の **Actions** タブを開く
-2. **Build merged firmware** workflow を選ぶ
-3. `platformio_envs` にビルドしたい PlatformIO environment 名を JSON 配列で指定する
-4. workflow を実行する
-5. 実行結果から生成された artifact をダウンロードする
-
-たとえば，`m5stack-basic` と `m5stack-atom-matrix` のファームウェアを生成する場合は，次のように指定します。
-
-```json
-["m5stack-basic","m5stack-atom-matrix"]
-```
-
-この場合，GitHub Actions 上で次のようなコマンドが実行されます。
+Use the `bump_version` PlatformIO custom target to compute and push
+the next tag:
 
 ```sh
-pio run -e m5stack-basic -t firmware
-pio run -e m5stack-atom-matrix -t firmware
+pio run -t bump_version                # dry-run patch bump
+BUMP_EXECUTE=1 pio run -t bump_version # actually tag and push
 ```
 
-生成された `.bin` ファイルは，environment ごとに artifact としてアップロードされます。
+Full options in [VERSIONBUMP.md](VERSIONBUMP.md). The OTA flow and
+asset naming rules are in [OTA.md](OTA.md).
 
-たとえば `m5stack-basic` の場合，artifact 名は次のようになります。
+## Credits
 
-```text
-firmware-m5stack-basic
-```
+- Upstream boilerplate: [3110/m5stack-platformio-boilerplate-code](https://github.com/3110/m5stack-platformio-boilerplate-code)
+  by `3110`. This repo is a recent fork with modifications —
+  SafeGithubOTA integration, BLE provisioning, NVS WiFi seeding,
+  release workflows.
+- OTA library: [gibz104/SafeGithubOTA](https://github.com/gibz104/SafeGithubOTA)
+  by `gibz104`.
 
-artifact をダウンロードすると，その中に次のようなファームウェアファイルが含まれます。
+## License
 
-```text
-my_project_m5stack-basic_firmware_0.1.0.bin
-```
+See [LICENCE.md](LICENCE.md).
 
-派生プロジェクトで標準的にビルドしたい environment が決まっている場合は，`.github/workflows/build-firmware.yml` の `platformio_envs` の `default` を変更してください。
+---
 
-```yaml
-default: '["m5stack-basic"]'
-```
+## Secondary: compile-time WiFi credentials
 
-複数の environment を標準にしたい場合は，次のように指定できます。
+**Not the recommended path** — BLE provisioning above is preferred and
+keeps secrets out of build artifacts. Compile-time seeding exists for
+locked-down dev firmware or factory provisioning.
 
-```yaml
-default: '["m5stack-basic","m5stack-atom-matrix"]'
-```
+To enable, in [platformio.ini](platformio.ini):
+
+1. Uncomment `-DPRESET_WIFI_CREDS` and the two `-DWIFI_*` lines in
+   the `[wifi-credentials]` section.
+1. Inherit `${wifi-credentials.build_flags}` from the env(s) that
+   should bake the creds in (opt-in per env).
+1. Export the values before building:
+
+   ```sh
+   export WIFI_SSID="your-ssid"
+   export WIFI_PASSWORD="your-password"
+   pio run -e <env> -t upload
+   ```
+
+On first boot the device calls `WiFi.begin(WIFI_SSID, WIFI_PASSWORD)`,
+which persists the credentials to the IDF `nvs.net80211` slot.
+Subsequent boots reconnect via `WiFi.begin()` with no args. See
+`seedWifiCredsIfEmpty()` in [src/main.cpp](src/main.cpp).
+
+## Notes
+
+I have not tested Arduino 2 and classic Platformio - I only focused on [Pioarduino](https://github.com/pioarduino).ioarduino

@@ -6,3 +6,6 @@
 src/idf_component.yml*
 .vscode/extensions.json
 .cc-history
+firmware
+.dummy
+managed_components
