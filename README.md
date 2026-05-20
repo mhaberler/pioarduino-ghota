@@ -184,7 +184,7 @@ locked-down dev firmware or factory provisioning.
 
 To enable, in [platformio.ini](platformio.ini):
 
-1. Uncomment `-DPRESET_WIFI_CREDS` and the two `-DWIFI_*` lines in
+1. Uncomment the two `-DWIFI_*` lines in
    the `[wifi-credentials]` section.
 1. Inherit `${wifi-credentials.build_flags}` from the env(s) that
    should bake the creds in (opt-in per env).

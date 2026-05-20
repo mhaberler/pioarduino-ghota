@@ -32,39 +32,24 @@ ImprovWiFiBLE improvBLE;
 static wl_status_t wifiStatus = WL_NO_SHIELD; // status tracking
 
 void onImprovWiFiErrorCb(ImprovTypes::Error err) {
-    log_i("improv error %d", err);
+    log_e("improv error %d", err);
 }
 
 void onImprovWiFiConnectedCb(const char *ssid, const char *password) {
-    // Save ssid and password here
+    // commit ssid and password here
     log_i("wifi connected %s %s", ssid, password);
     saveWiFiCredentials( ssid, password);
-    // server.begin();
-    // blinkLed(100, 3);
 }
 
 void onImprovWiFiIdentifyCb() {
     // Visible/audible identification of this device.
-    log_i("identify received");
-    // blinkLed(80, 10);
-}
-bool connectWifi(const char *ssid, const char *password) {
-    log_i("wifi connecting:  %s %s", ssid, password);
-
-    WiFi.begin(ssid, password);
-
-    while (!improvBLE.isConnected()) {
-        // blinkLed(500, 1);
-        delay(10);
-    }
-    return true;
+    log_w("identify received");
 }
 
 void startImprovProvisioning() {
     improvBLE.onImprovError(onImprovWiFiErrorCb);
     improvBLE.onImprovConnected(onImprovWiFiConnectedCb);
     improvBLE.onImprovIdentify(onImprovWiFiIdentifyCb);  // Optional
-    improvBLE.setCustomConnectWiFi(connectWifi);  // Optional
 
     // starts the advertisement + provisioning process
     improvBLE.setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32, "My-Device-9a4c2b", "2.1.5", "My Device");
@@ -79,10 +64,14 @@ void wifiSetup() {
         log_w("loaded creds: %s %s", savedSSID.c_str(), savedPASS.c_str());
         WiFi.begin(savedSSID.c_str(), savedPASS.c_str());
     } else {
-        log_i("No Wi-Fi credentials found in Preferences.");
-        WiFi.begin();
+        if (seedWifiStationCredsIfEmpty(false)) {
+            return;
+        }
     }
+    log_i("No Wi-Fi credentials found in Preferences.");
+    WiFi.begin();
 }
+
 
 void wifiLoop() {
     static wl_status_t wifiStatus = WL_NO_SHIELD;
