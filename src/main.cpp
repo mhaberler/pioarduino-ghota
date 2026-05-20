@@ -17,6 +17,7 @@
 // reverts to the previous firmware.
 
 #include "otasupport.hpp"
+#include "wifisupport.hpp"
 
 // Increase loop task stack for TLS operations (default 8KB is not enough)
 SET_LOOP_TASK_STACK_SIZE(16 * 1024);
@@ -26,6 +27,8 @@ bool validateFirmware();  // see validatefirmware.cpp
 void setup() {
     Serial.begin(115200);
     delay(3000);
+
+    wifiSetup();
 
     otaSetup(validateFirmware);  // or use just otaSetup(); without validation
     log_i("Setup complete.");

@@ -1,7 +1,6 @@
 #include <SafeGithubOTA.h>
 #include <Preferences.h>
 #include <WiFi.h>
-#include <WiFiProv.h>
 #include <esp_wifi.h>
 #include <lwip/inet.h>
 #include "otasupport.hpp"
@@ -20,12 +19,6 @@
 #endif
 #ifndef SGO_DEFAULT_BIN
     #define SGO_DEFAULT_BIN ""
-#endif
-#ifndef WIFI_SSID
-    #define WIFI_SSID ""
-#endif
-#ifndef WIFI_PASSWORD
-    #define WIFI_PASSWORD ""
 #endif
 
 // ---- weak can be overriden, see main.cpp ----
@@ -263,10 +256,9 @@ void otaSetup(SGO_ValidationCallback validationCb) {
     // disable PAT for public repos
     ota.setPatRequired(false);
 
-    // Configure OTA before begin(). Prefer BUILD_TAG when injected by build.
-
     ota.setVersion(version);
     log_i("=== SafeGithubOTA Auto-Check Example (%s) ===", version);
+
     // Set the validation callback for rollback protection.
     // After an OTA update, this runs on first boot. If it returns false,
     // the ESP32 bootloader automatically reverts to the previous firmware.
@@ -297,20 +289,6 @@ void otaSetup(SGO_ValidationCallback validationCb) {
         ota.startProvisioningPortal(provSsid);
     }
 
-    // BLE-based WiFi provisioning (esp_wifi_prov). Only start if NVS has
-    // no usable STA creds — build-time WIFI_SSID seeding (above) and prior
-    // BLE provisioning both populate the same slot.
-    bool haveCreds = hasSavedWifiStationCredentials();
-    logSavedWifiStationCredentials();
-
-    if (!seedWifiStationCredsIfEmpty(haveCreds)) {
-        WiFi.begin();  // use existing NVS creds (prior boot or BLE prov)
-    }
-
-    if (!haveCreds) {
-        log_i("No WiFi station creds in NVS; starting provisioning");
-        WiFiProv.beginProvision(NETWORK_PROV_SCHEME_BLE);
-    }
 
     // Initialize OTA (must be called after WiFi is connected).
     // Syncs time via NTP, handles post-OTA validation, loads creds from NVS.

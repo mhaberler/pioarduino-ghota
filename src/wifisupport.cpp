@@ -1,8 +1,14 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <WiFiProv.h>
 #include <esp_wifi.h>
 #include <cstring>
 #include "wifisupport.hpp"
+#include "sdkconfig.h"
+
+// #if CONFIG_ESP_WIFI_REMOTE_ENABLED
+//     #error "WiFiProv is only supported in SoCs with native Wi-Fi support"
+// #endif
 
 #ifdef WIFI_SSID
     #define INITIAL_SSID WIFI_SSID
@@ -16,6 +22,31 @@
 #endif
 static const char* wifiSSID = INITIAL_SSID;
 static const char* wifiPassword = INITIAL_PASSWORD;
+#if defined(CONFIG_ESP_WIFI_REMOTE_ENABLED)
+    static bool wifiProvAvailable = false;
+#else
+    static bool wifiProvAvailable = true;
+#endif
+
+void wifiSetup() {
+    // BLE-based WiFi provisioning (esp_wifi_prov). Only start if NVS has
+    // no usable STA creds — build-time WIFI_SSID seeding (above) and prior
+    // BLE provisioning both populate the same slot.
+    bool haveCreds = hasSavedWifiStationCredentials();
+    logSavedWifiStationCredentials();
+
+    if (!seedWifiStationCredsIfEmpty(haveCreds)) {
+        WiFi.begin();  // use existing NVS creds (prior boot or BLE prov)
+    }
+
+    if (!haveCreds) {
+        log_i("No WiFi station creds in NVS");
+        if (wifiProvAvailable) {
+            log_i("starting WiFiProv provisioning");
+            WiFiProv.beginProvision(NETWORK_PROV_SCHEME_BLE);
+        }
+    }
+}
 
 // Retrieve currently-saved STA credentials via the supported ESP-IDF API.
 // Driver must be initialised first (WiFi.mode(WIFI_STA) or WiFi.begin()).
