@@ -1,30 +1,36 @@
 # pioarduino-ghota
 
 ESP32 / M5Stack PlatformIO firmware demonstrating [SafeGithubOTA] with
-BLE WiFi provisioning and automated GitHub-release-driven OTA updates.
+Improv-WiFi BLE provisioning and automated GitHub-release-driven OTA
+updates.
 
 [SafeGithubOTA]: https://github.com/gibz104/SafeGithubOTA
 
 ## What it does
 
-- BLE WiFi provisioning via `WiFiProv` (`NETWORK_PROV_SCHEME_BLE`) —
-  the device advertises a setup SSID; use the Espressif
-  "ESP BLE Provisioning" app to hand over credentials, which are
-  persisted to NVS for subsequent boots.
+- BLE WiFi provisioning via [Improv-WiFi] (`ImprovWiFiBLE`) — device
+  advertises an Improv BLE service; any Improv-compatible client
+  (Improv Web, ESP Web Tools, Home Assistant) hands over WiFi
+  credentials, which are persisted to NVS for subsequent boots.
 - Automatic OTA from GitHub releases: one-shot post-boot check
   (`AUTOCHECK_POST_BOOT`) and/or periodic poll (`AUTOCHECK_INTERVAL`).
 - Validation callback on first boot after an OTA; if it returns
   `false`, the ESP32 bootloader rolls back to the previous firmware.
 - Reproducible CI builds and tagged releases via GitHub Actions.
 
-## ESP BLE Prov mobile app
+[Improv-WiFi]: https://www.improv-wifi.com/
 
-You will need the `ESP BLE Prov` provisioning app to set the WiFi credentials.
+## Improv-WiFi client
 
-- [ESP BLE Prov for Android](https://play.google.com/store/apps/details?id=com.espressif.provble&hl=en)
-- [ESP BLE Prov for iOS](https://apps.apple.com/us/app/esp-ble-provisioning/id1473590141)
+No mobile app required. Use any Improv-WiFi BLE client:
 
-Alternatively you can use WiFi to configure WiFi credentials - see the [SafeGithubOTA examples](https://github.com/gibz104/SafeGithubOTA/tree/main/examples) if your want to go that route.
+- [Improv Web (Chrome/Edge, Web Bluetooth)](https://www.improv-wifi.com/ble/)
+- [ESP Web Tools](https://esphome.github.io/esp-web-tools/)
+- Home Assistant (auto-discovers Improv devices)
+
+Alternatively you can use WiFi-based provisioning — see the
+[SafeGithubOTA examples](https://github.com/gibz104/SafeGithubOTA/tree/main/examples)
+if you want to go that route.
 
 ## How to use this repo without building firmware yourself
 
@@ -37,8 +43,8 @@ Alternatively you can use WiFi to configure WiFi credentials - see the [SafeGith
    2. in `Choose a file ...` select the firmware\_<version>.bin` file just dowloaded
    3. Click `Program`
    4. Connect a terminal window - you should see some logs during startup
-6. At this stage the firmware lacks WiFi credentials - they can be set with the `ESP BLE Prov` app (available for iOS and Android)
-7. Once the credentials are set, firmware will reboot, connect to WiFi and check for new OTA releases as configure in the platformio.ini and src/main.cpp files.
+6. At this stage the firmware lacks WiFi credentials - set them via any Improv-WiFi BLE client (e.g. [Improv Web](https://www.improv-wifi.com/ble/) in Chrome/Edge, or Home Assistant).
+7. Once credentials are set, firmware connects to WiFi and checks for new OTA releases as configured in platformio.ini and src/main.cpp.
 
 ## My hardware is not listed / I want to use this for my project
 
@@ -89,8 +95,9 @@ pio run -e m5stack-cores3-m5unified -t upload
 pio device monitor
 ```
 
-On first boot, BLE provisioning starts under the SSID `MyDevice-Setup`.
-Use the Espressif "ESP BLE Provisioning" app to deliver WiFi
+If no WiFi credentials are stored, the device starts Improv-WiFi BLE
+advertising ~10 s after boot. Connect with any Improv-WiFi client
+(e.g. [Improv Web](https://www.improv-wifi.com/ble/)) to deliver
 credentials; they persist in NVS for subsequent boots.
 
 ## Configuration
@@ -165,8 +172,8 @@ asset naming rules are in [OTA.md](OTA.md).
 
 - Upstream boilerplate: [3110/m5stack-platformio-boilerplate-code](https://github.com/3110/m5stack-platformio-boilerplate-code)
   by `3110`. This repo is a recent fork with modifications —
-  SafeGithubOTA integration, BLE provisioning, NVS WiFi seeding,
-  release workflows.
+  SafeGithubOTA integration, Improv-WiFi BLE provisioning, NVS WiFi
+  seeding, release workflows.
 - OTA library: [gibz104/SafeGithubOTA](https://github.com/gibz104/SafeGithubOTA)
   by `gibz104`.
 
@@ -178,9 +185,9 @@ See [LICENCE.md](LICENCE.md).
 
 ## Secondary: compile-time WiFi credentials
 
-**Not the recommended path** — BLE provisioning above is preferred and
-keeps secrets out of build artifacts. Compile-time seeding exists for
-locked-down dev firmware or factory provisioning.
+**Not the recommended path** — Improv-WiFi BLE provisioning above is
+preferred and keeps secrets out of build artifacts. Compile-time
+seeding exists for locked-down dev firmware or factory provisioning.
 
 To enable, in [platformio.ini](platformio.ini):
 

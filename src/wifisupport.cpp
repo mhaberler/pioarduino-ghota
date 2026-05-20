@@ -8,7 +8,7 @@
 #include "credstore.hpp"
 
 
-// start BLE provisioning service after 10 sec w/o wifi connect
+// start Improv-WiFi BLE provisioning service after 10 sec w/o wifi connect
 #define TIME_TO_CONNECT 10*1000
 
 #ifdef WIFI_SSID

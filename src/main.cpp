@@ -1,16 +1,16 @@
-// SafeGithubOTA - Auto-Check with BLE Provisioning
+// SafeGithubOTA - Auto-Check with Improv-WiFi BLE Provisioning
 //
 // Derived from: https://github.com/gibz104/SafeGithubOTA
 //
 // Demonstrates:
-// - BLE provisioning via WiFiProv (NETWORK_PROV_SCHEME_BLE)
+// - BLE WiFi provisioning via Improv-WiFi (ImprovWiFiBLE)
 // - Automatic periodic update checks (AUTOCHECK_INTERVAL)
 // - Optional one-shot post-boot check (AUTOCHECK_POST_BOOT)
 // - Validation callback for rollback protection
 // - Progress reporting during download (see otasupport.cpp)
 // - Rollback detection via wasRolledBack()
 //
-// Required libraries: SafeGithubOTA, ESP32 Arduino core (Preferences, WiFiProv).
+// Required libraries: SafeGithubOTA, ESP32 Arduino core (Preferences), ImprovWiFiLibrary.
 //
 // After an OTA update, the validation callback verifies the new firmware
 // before confirming it. If it returns false, the ESP32 bootloader
