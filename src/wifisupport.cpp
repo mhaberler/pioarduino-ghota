@@ -46,13 +46,22 @@ void onImprovWiFiIdentifyCb() {
     log_w("identify received");
 }
 
+void getMacAddress(String &macStr) {
+    uint8_t mac[6];
+    Network.macAddress(mac);
+    macStr = String(mac[0], HEX) + String(mac[1], HEX) + String(mac[2], HEX) + String(mac[3], HEX) + String(mac[4], HEX) + String(mac[5], HEX);
+    macStr.toUpperCase();
+}
+
 void startImprovProvisioning() {
     improvBLE.onImprovError(onImprovWiFiErrorCb);
     improvBLE.onImprovConnected(onImprovWiFiConnectedCb);
     improvBLE.onImprovIdentify(onImprovWiFiIdentifyCb);  // Optional
-
+    String mac;
+    getMacAddress(mac);
+    String devId = "PGH_" + mac;
     // starts the advertisement + provisioning process
-    improvBLE.setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32, "My-Device-9a4c2b", "2.1.5", "My Device");
+    improvBLE.setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32, "My-Device-9a4c2b", "2.1.5", devId.c_str());
 }
 
 void wifiSetup() {
