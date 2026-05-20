@@ -1,14 +1,15 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <WiFiProv.h>
+#include <ImprovWiFiBLE.h>
 #include <esp_wifi.h>
 #include <cstring>
 #include "wifisupport.hpp"
 #include "sdkconfig.h"
+#include "credstore.hpp"
 
-// #if CONFIG_ESP_WIFI_REMOTE_ENABLED
-//     #error "WiFiProv is only supported in SoCs with native Wi-Fi support"
-// #endif
+
+// start BLE provisioning service after 10 sec w/o wifi connect
+#define TIME_TO_CONNECT 10*1000
 
 #ifdef WIFI_SSID
     #define INITIAL_SSID WIFI_SSID
@@ -27,66 +28,77 @@ static const char* wifiPassword = INITIAL_PASSWORD;
 #else
     static bool wifiProvAvailable = true;
 #endif
+ImprovWiFiBLE improvBLE;
+static wl_status_t wifiStatus = WL_NO_SHIELD; // status tracking
+
+void onImprovWiFiErrorCb(ImprovTypes::Error err) {
+    log_i("improv error %d", err);
+}
+
+void onImprovWiFiConnectedCb(const char *ssid, const char *password) {
+    // Save ssid and password here
+    log_i("wifi connected %s %s", ssid, password);
+    saveWiFiCredentials( ssid, password);
+    // server.begin();
+    // blinkLed(100, 3);
+}
+
+void onImprovWiFiIdentifyCb() {
+    // Visible/audible identification of this device.
+    log_i("identify received");
+    // blinkLed(80, 10);
+}
+bool connectWifi(const char *ssid, const char *password) {
+    log_i("wifi connecting:  %s %s", ssid, password);
+
+    WiFi.begin(ssid, password);
+
+    while (!improvBLE.isConnected()) {
+        // blinkLed(500, 1);
+        delay(10);
+    }
+    return true;
+}
+
+void startImprovProvisioning() {
+    improvBLE.onImprovError(onImprovWiFiErrorCb);
+    improvBLE.onImprovConnected(onImprovWiFiConnectedCb);
+    improvBLE.onImprovIdentify(onImprovWiFiIdentifyCb);  // Optional
+    improvBLE.setCustomConnectWiFi(connectWifi);  // Optional
+
+    // starts the advertisement + provisioning process
+    improvBLE.setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32, "My-Device-9a4c2b", "2.1.5", "My Device");
+}
 
 void wifiSetup() {
-    // BLE-based WiFi provisioning (esp_wifi_prov). Only start if NVS has
-    // no usable STA creds — build-time WIFI_SSID seeding (above) and prior
-    // BLE provisioning both populate the same slot.
-    bool haveCreds = hasSavedWifiStationCredentials();
-    logSavedWifiStationCredentials();
-
-    if (!seedWifiStationCredsIfEmpty(haveCreds)) {
-        WiFi.begin();  // use existing NVS creds (prior boot or BLE prov)
-    }
-
-    if (!haveCreds) {
-        log_i("No WiFi station creds in NVS");
-        if (wifiProvAvailable) {
-            log_i("starting WiFiProv provisioning");
-            WiFiProv.beginProvision(NETWORK_PROV_SCHEME_BLE);
-        }
-    }
-}
-
-// Retrieve currently-saved STA credentials via the supported ESP-IDF API.
-// Driver must be initialised first (WiFi.mode(WIFI_STA) or WiFi.begin()).
-// ssid/password in wifi_config_t are fixed-size null-padded buffers; cap
-// with strnlen so a non-terminated 32/64-byte blob doesn't run past the end.
-bool getSavedWifiStationCredentials(String& ssid, String& password) {
-    wifi_mode_t cm = WiFi.getMode();
     WiFi.mode(WIFI_STA);
+    WiFi.setAutoReconnect(true);
 
-    wifi_config_t cfg{};
-    if (esp_wifi_get_config(WIFI_IF_STA, &cfg) != ESP_OK) {
-        if (cm != WIFI_MODE_NULL) WiFi.mode(cm);
-        return false;
-    }
-    const char* s = reinterpret_cast<const char*>(cfg.sta.ssid);
-    const char* p = reinterpret_cast<const char*>(cfg.sta.password);
-    ssid = String(s, strnlen(s, sizeof(cfg.sta.ssid)));
-    password = String(p, strnlen(p, sizeof(cfg.sta.password)));
-    if (cm != WIFI_MODE_NULL) WiFi.mode(cm);
-    return ssid.length() > 0;
-}
-
-bool hasSavedWifiStationCredentials() {
-    String ssid, password;
-    return getSavedWifiStationCredentials(ssid, password);
-}
-
-void logSavedWifiStationCredentials() {
-    String ssid, password;
-    if (getSavedWifiStationCredentials(ssid, password)) {
-        log_i("esp_wifi_get_config SSID: %s", ssid.c_str());
-        if (password.length() > 0) {
-            log_i("esp_wifi_get_config Password: [%u chars]", password.length());
-        } else {
-            log_i("esp_wifi_get_config Password: [empty / open]");
-        }
+    String savedSSID, savedPASS;
+    if (loadWiFiCredentials(savedSSID, savedPASS)) {
+        log_w("loaded creds: %s %s", savedSSID.c_str(), savedPASS.c_str());
+        WiFi.begin(savedSSID.c_str(), savedPASS.c_str());
     } else {
-        log_i("esp_wifi_get_config: driver not inited or no creds");
+        log_i("No Wi-Fi credentials found in Preferences.");
+        WiFi.begin();
     }
 }
+
+void wifiLoop() {
+    static wl_status_t wifiStatus = WL_NO_SHIELD;
+    wl_status_t s = WiFi.status();
+    if (wifiStatus ^ s) {
+        log_i("WiFi status change %u -> %u", wifiStatus, s);
+        wifiStatus = s;
+    }
+    if (wifiStatus != WL_CONNECTED && millis() > TIME_TO_CONNECT) {
+        if (!improvBLE.isAdvertising()) {
+            startImprovProvisioning();
+        }
+    }
+
+}
+
 
 // Seed WiFi STA creds into NVS from build-time WIFI_SSID/WIFI_PASSWORD
 // macros, only if NVS slot is empty. Returns true if WiFi.begin(ssid,pw)

@@ -35,6 +35,7 @@ void setup() {
 }
 
 void loop() {
+    wifiLoop();
     otaLoop();
 
     // Your application code goes here

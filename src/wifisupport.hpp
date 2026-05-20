@@ -4,6 +4,7 @@
 #include <WString.h>
 
 void wifiSetup();
+void wifiLoop();
 
 bool seedWifiStationCredsIfEmpty(bool credsAlreadyPresent);
 bool hasSavedWifiStationCredentials();
