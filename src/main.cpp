@@ -32,7 +32,6 @@ void setup() {
 #if defined(M5UNIFIED)
     auto cfg = M5.config();
     M5.begin(cfg);
-    M5.Ex_I2C.begin();
 #endif
 
     wifiSetup();
