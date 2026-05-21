@@ -10,7 +10,7 @@ updates.
 
 - BLE WiFi provisioning via [Improv-WiFi] (`ImprovWiFiBLE`) — device
   advertises an Improv BLE service; any Improv-compatible client
-  (Improv Web, ESP Web Tools, Home Assistant) hands over WiFi
+  (Improv Web, WebSerial ESPTool, Home Assistant) hands over WiFi
   credentials, which are persisted to NVS for subsequent boots.
 - Automatic OTA from GitHub releases: one-shot post-boot check
   (`AUTOCHECK_POST_BOOT`) and/or periodic poll (`AUTOCHECK_INTERVAL`).
@@ -25,8 +25,9 @@ updates.
 No mobile app required. Use any Improv-WiFi BLE client:
 
 - [Improv Web (Chrome/Edge, Web Bluetooth)](https://www.improv-wifi.com/ble/)
-- [ESP Web Tools](https://esphome.github.io/esp-web-tools/)
-- Home Assistant (auto-discovers Improv devices)
+- [WebSerial ESPToolttps://jason2866.github.io/WebSerial_ESPTool/)WebSerial ESPToolWebSerial ESPToolTool
+
+Home Assistant (auto-discovers Improv devices)
 
 Alternatively you can use WiFi-based provisioning — see the
 [SafeGithubOTA examples](https://github.com/gibz104/SafeGithubOTA/tree/main/examples)
