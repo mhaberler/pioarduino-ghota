@@ -60,18 +60,78 @@ if you want to go that route.
 
 ## Supported boards
 
-[platformio.ini](platformio.ini) declares envs for the full M5Stack
-family — Basic, Fire, M5Go, Core2, CoreS3, StickC family, Atom and
-AtomS3 family, CoreInk, Paper, PaperS3, StampS3, StampP4, Capsule,
-Dial, Cardputer, DIN Meter, NanoC6, NanoH2, Tab5, and several
-`m5unified` / LLM variants.
+Active envs declared in [platformio.ini](platformio.ini):
 
-Only the envs listed in the `[ci]` section are built by CI, currently:
+M5Stack Core / Fire / Go:
+
+- `m5stack-basic`
+- `m5stack-basic-m5unified`
+- `m5stack-basic-m5unified-llm`
+- `m5stack-fire`
+- `m5stack-m5go`
+- `m5stack-core2-m5unified`
+- `m5stack-core2-m5unified-llm`
+- `m5stack-cores3`
+- `m5stack-cores3-m5unified`
+- `m5stack-cores3-m5unified-llm`
+
+M5Stick:
+
+- `m5stick-s3`
+
+M5Atom / AtomS3:
+
+- `m5stack-atom-matrix`
+- `m5stack-atom-lite`
+- `m5stack-atom-echo`
+- `m5stack-atom-u`
+- `m5stack-atom-matrix-m5unified`
+- `m5stack-atom-lite-m5unified`
+- `m5stack-atom-echo-m5unified`
+- `m5stack-atom-u-m5unified`
+- `m5stack-atoms3`
+- `m5stack-atoms3r-m5unified`
+- `m5stack-atom-echos3r-m5unified`
+- `m5stack-atoms3-lite`
+- `m5stack-atoms3-u`
+- `m5stack-atoms3-m5unified`
+- `m5stack-atoms3-lite-m5unified`
+- `m5stack-atoms3-u-m5unified`
+
+M5Stack CoreInk / Stamp / Capsule / Dial / Cardputer / DIN Meter:
+
+- `m5stack-coreink`
+- `m5stack-stamps3`
+- `m5stack-stamps3-m5unified`
+- `m5stack-capsule-m5unified`
+- `m5stack-dial`
+- `m5stack-dial-m5unified`
+- `m5stack-cardputer`
+- `m5stack-din-meter`
+- `m5stack-stampp4`
+
+M5Stack Nano / Tab5 / Chain:
+
+- `m5stack-nanoc6` (default env)
+- `m5stack-nanoh2`
+- `m5stack-tab5`
+- `m5stack-chain-dualkey`
+
+Non-M5Stack:
+
+- `esp32p4_waveshare_devkit`
+
+Built by CI (`[ci]` section):
 
 - `m5stack-nanoc6`
+- `esp32p4_waveshare_devkit`
 - `m5stack-cores3-m5unified`
+- `m5stack-tab5`
 
-Edit as required in [platformio.ini](platformio.ini).
+Edit as required in [platformio.ini](platformio.ini). Other envs build
+locally but are not gated by CI. See
+[build-firmware.yml](.github/workflows/build-firmware.yml) and
+[release.yml](.github/workflows/release.yml).
 
 Other envs build locally but are not gated by CI. See [build-firmware.yml](.github/workflows/build-firmware.yml) and [release.yml](.github/workflows/release.yml).
 
