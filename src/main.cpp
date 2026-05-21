@@ -15,7 +15,9 @@
 // After an OTA update, the validation callback verifies the new firmware
 // before confirming it. If it returns false, the ESP32 bootloader
 // reverts to the previous firmware.
-
+#if defined(M5UNIFIED)
+    #include <M5Unified.h>
+#endif
 #include "otasupport.hpp"
 #include "wifisupport.hpp"
 
@@ -27,6 +29,11 @@ bool validateFirmware();  // see validatefirmware.cpp
 void setup() {
     Serial.begin(115200);
     delay(3000);
+#if defined(M5UNIFIED)
+    auto cfg = M5.config();
+    M5.begin(cfg);
+    M5.Ex_I2C.begin();
+#endif
 
     wifiSetup();
 

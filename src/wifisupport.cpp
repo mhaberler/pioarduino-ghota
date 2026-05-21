@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <ESP_HostedOTA.h>
 #include <ImprovWiFiBLE.h>
 #include <esp_wifi.h>
 #include <cstring>
@@ -9,7 +10,7 @@
 
 
 // start Improv-WiFi BLE provisioning service after 10 sec w/o wifi connect
-#define TIME_TO_CONNECT 10*1000
+#define TIME_TO_CONNECT 30*1000
 
 #ifdef WIFI_SSID
     #define INITIAL_SSID WIFI_SSID
@@ -65,6 +66,12 @@ void startImprovProvisioning() {
 }
 
 void wifiSetup() {
+#ifdef BOARD_HAS_SDIO_ESP_HOSTED
+    WiFi.setPins(BOARD_SDIO_ESP_HOSTED_CLK, BOARD_SDIO_ESP_HOSTED_CMD, BOARD_SDIO_ESP_HOSTED_D0,
+                 BOARD_SDIO_ESP_HOSTED_D1, BOARD_SDIO_ESP_HOSTED_D2, BOARD_SDIO_ESP_HOSTED_D3,
+                 BOARD_SDIO_ESP_HOSTED_RESET);
+#endif
+    delay(300);
     WiFi.mode(WIFI_STA);
     WiFi.setAutoReconnect(true);
 
@@ -88,6 +95,14 @@ void wifiLoop() {
     if (wifiStatus ^ s) {
         log_i("WiFi status change %u -> %u", wifiStatus, s);
         wifiStatus = s;
+        if (wifiStatus == WL_CONNECTED) {
+            if (updateEspHostedSlave()) {
+                // Restart the host ESP32 after successful update
+                // This is currently required to properly activate the new firmware
+                // on the ESP-Hosted co-processor
+                ESP.restart();
+            }
+        }
     }
     if (wifiStatus != WL_CONNECTED && millis() > TIME_TO_CONNECT) {
         if (!improvBLE.isAdvertising()) {
