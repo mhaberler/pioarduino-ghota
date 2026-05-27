@@ -50,7 +50,7 @@ Strongly hierarchical `extends =` chains. Conventions:
 - Board bases: `[m5stack-<name>]` set `board =` + board-specific `-D` flags; do not list a target env directly here.
 - Feature mixins: `[m5gfx]`, `[m5unified]`, `[fastled]`, `[neopixel]`, `[module-llm]`, `[improv]`, `[ghota]`.
 - `[build-target]` → `[debug]` or `[release]`: aggregates `${improv.build_flags} ${ghota.build_flags} ${wifi-credentials.build_flags}` plus `CORE_DEBUG_LEVEL`. **Any `[env:*]` that overrides `build_flags = ...` instead of inheriting via `${build-target.build_flags}` must also explicitly include `${improv.build_flags}`** — otherwise `ImprovWiFiBLE` compiles out and `wifisupport.cpp` fails to build (this bit `esp32p4_waveshare_devkit`).
-- `lib_ldf_mode = deep` is set globally; do not lower it without testing — `ImprovWiFiBLE`/SafeGithubOTA pull transitive headers.
+- `lib_ldf_mode = chain` is set globally (`deep` is unreliable). Libs must declare their own transitive dependencies; if a build fails with missing headers, check that the relevant library's `library.json` lists all deps.
 
 ### CI workflows
 
